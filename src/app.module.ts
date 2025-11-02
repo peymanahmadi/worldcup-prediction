@@ -7,6 +7,7 @@ import rabbitmqConfig from './config/rabbitmq.config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -37,6 +38,8 @@ import { redisStore } from 'cache-manager-redis-store';
         ttl: configService.get('redis.ttl'),
       }),
     }),
+
+    AuthModule,
   ],
 })
 export class AppModule {}
