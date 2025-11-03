@@ -11,8 +11,8 @@ export const OTP_CONSTANTS = {
   // Redis key prefixes
   KEY_PREFIX: {
     OTP: 'otp:phone:',
-    SEND_LIMIT: 'otp:send:limit',
-    VERIFY_ATTMEPTS: 'otp:verify:attempts:',
+    SEND_LIMIT: 'otp:send:limit:',
+    VERIFY_ATTEMPTS: 'otp:verify:attempts:',
   },
 
   // Error messages

@@ -1,9 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RedisService } from 'src/modules/redis/redis.service';
-import * as crypto from 'crypto';
+import { RedisService } from '../../redis/redis.service';
 import { OTP_CONSTANTS } from '../constants/otp.constants';
-import { OtpExpiredException, OtpInvalidException, OtpNotFoundException, OtpSendLimitException, OtpVerifyLimitException } from '../exceptions/otp.exceptions';
 import { OtpData, OtpVerificationResult } from '../interfaces/otp.interface';
+import {
+  OtpSendLimitException,
+  OtpVerifyLimitException,
+  OtpInvalidException,
+  OtpExpiredException,
+  OtpNotFoundException,
+} from '../exceptions/otp.exceptions';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class OtpService {
@@ -15,7 +21,9 @@ export class OtpService {
    * Generate a secure 6-digit OTP code
    */
   private generateOtpCode(): string {
+    // Generate cryptographically secure random number
     const randomNumber = crypto.randomInt(0, 1000000);
+    // Pad with zeros to ensure 6 digits
     return randomNumber.toString().padStart(OTP_CONSTANTS.OTP_LENGTH, '0');
   }
 
@@ -37,7 +45,7 @@ export class OtpService {
    * Get Redis key for verification attempts
    */
   private getVerifyAttemptsKey(phone: string): string {
-    return `${OTP_CONSTANTS.KEY_PREFIX.VERIFY_ATTMEPTS}${phone}`;
+    return `${OTP_CONSTANTS.KEY_PREFIX.VERIFY_ATTEMPTS}${phone}`;
   }
 
   /**
@@ -70,17 +78,21 @@ export class OtpService {
    * Generate and store OTP
    */
   async generateAndStoreOtp(phone: string): Promise<string> {
+    // Check send limit first
     await this.checkSendLimit(phone);
 
+    // Generate OTP code
     const code = this.generateOtpCode();
     const expiresAt = Date.now() + OTP_CONSTANTS.OTP_TTL * 1000;
 
+    // Prepare OTP data
     const otpData: OtpData = {
       code,
       expiresAt,
       attempts: 0,
     };
 
+    // Store in Redis
     const key = this.getOtpKey(phone);
     await this.redisService.set(
       key,
@@ -88,8 +100,10 @@ export class OtpService {
       OTP_CONSTANTS.OTP_TTL,
     );
 
+    // Set send limit
     await this.setSendLimit(phone);
 
+    // Reset verification attempts counter
     const attemptsKey = this.getVerifyAttemptsKey(phone);
     await this.redisService.del(attemptsKey);
 
