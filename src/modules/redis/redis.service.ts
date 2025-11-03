@@ -51,6 +51,22 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Set value in Redis with optional TTL
+   */
+  async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
+    try {
+      if (ttlSeconds) {
+        await this.client.setEx(key, ttlSeconds, value);
+      } else {
+        await this.client.set(key, value);
+      }
+    } catch (error) {
+      this.logger.error(`Error setting key ${key}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete key from Redis
    */
   async del(key: string): Promise<number> {
