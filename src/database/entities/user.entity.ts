@@ -1,10 +1,12 @@
 import {
-  Column,
-  CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Session } from './session.entity';
 
 @Entity('users')
 export class User {
@@ -25,4 +27,8 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  // Relations
+  @OneToMany(() => Session, (session) => session.user)
+  sessions: Session[];
 }
