@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
@@ -11,6 +11,8 @@ import rabbitmqConfig from './config/rabbitmq.config';
 // Import modules
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { HealthModule } from './modules/health/health.module';
+import { LoggerMiddleware } from '@common/middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -28,6 +30,11 @@ import { RedisModule } from './modules/redis/redis.module';
     }),
     AuthModule,
     RedisModule,
+    HealthModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
