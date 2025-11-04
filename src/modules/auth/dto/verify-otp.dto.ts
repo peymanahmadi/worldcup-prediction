@@ -1,5 +1,14 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, Length, Matches } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsString,
+  Length,
+  Matches,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { DeviceInfoDto } from './device-info.dto';
 
 export class VerifyOtpDto {
   @ApiProperty({
@@ -24,4 +33,13 @@ export class VerifyOtpDto {
     message: 'OTP code must be 6 digits',
   })
   code: string;
+
+  @ApiPropertyOptional({
+    description: 'Device information for session tracking',
+    type: DeviceInfoDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DeviceInfoDto)
+  deviceInfo?: DeviceInfoDto;
 }
