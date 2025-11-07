@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Prediction } from '@database/entities/prediction.entity';
-import { PredictionResult } from '@database/entities/prediction-result.entity';
+import { Prediction } from '../../../database/entities/prediction.entity';
+import { PredictionResult } from '../../../database/entities/prediction-result.entity';
 import {
   CORRECT_GROUPS,
   IRAN_TEAM_ID,

@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { TokenService } from '@modules/auth/services/token.service';
+import { TokenService } from '../../modules/auth/services/token.service';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 

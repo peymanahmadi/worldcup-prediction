@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:3000';
 let authToken = '';
 
 // Correct groups from config

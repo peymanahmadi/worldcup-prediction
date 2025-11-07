@@ -13,7 +13,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { TeamService } from './team.service';
 import { TeamDto, TeamsByGroupDto } from './dto/team-response.dto';
 

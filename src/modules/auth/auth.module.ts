@@ -2,19 +2,22 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '@database/entities/user.entity';
+import { User } from '../../database/entities/user.entity';
 import { OtpService } from './services/otp.service';
-import { Session } from '@database/entities/session.entity';
+import { Session } from '../../database/entities/session.entity';
 import { TokenService } from './services/token.service';
-import { RateLimitGuard } from '@common/guards/rate-limit.guard';
-import { AuthGuard } from '@common/guards/auth.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { AuthGuard } from '../../common/guards/auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SessionCleanupService } from './services/session-cleanup.service';
+import { HttpModule } from '@nestjs/axios';
+import { SmsService } from './services/sms.service';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([User, Session]),
+    HttpModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -24,6 +27,7 @@ import { SessionCleanupService } from './services/session-cleanup.service';
     SessionCleanupService,
     RateLimitGuard,
     AuthGuard,
+    SmsService,
   ],
   exports: [AuthService, OtpService, TokenService, AuthGuard],
 })

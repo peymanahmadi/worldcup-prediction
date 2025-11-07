@@ -1,9 +1,9 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Session } from '@database/entities/session.entity';
-import { User } from '@database/entities/user.entity';
-import { RedisService } from '@modules/redis/redis.service';
+import { Session } from '../../../database/entities/session.entity';
+import { User } from '../../../database/entities/user.entity';
+import { RedisService } from '../../redis/redis.service';
 import { TOKEN_CONSTANTS } from '../constants/token.constants';
 import {
   DeviceInfo,

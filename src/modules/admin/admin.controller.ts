@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Query,
   Body,
 } from '@nestjs/common';
 import {
@@ -12,7 +11,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
 import { AdminService } from './admin.service';

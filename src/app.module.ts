@@ -12,12 +12,11 @@ import rabbitmqConfig from './config/rabbitmq.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { HealthModule } from './modules/health/health.module';
-import { LoggerMiddleware } from '@common/middleware/logger.middleware';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { TeamModule } from './modules/team/team.module';
 import { PredictionModule } from './modules/prediction/prediction.module';
 import { ScoringModule } from './modules/scoring/scoring.module';
-import { QueueModule } from '@modules/queue/queue.module';
-import { AdminModule } from '@modules/admin/admin.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -39,7 +38,6 @@ import { AdminModule } from '@modules/admin/admin.module';
     TeamModule,
     PredictionModule,
     ScoringModule,
-    // QueueModule,
     AdminModule,
   ],
 })

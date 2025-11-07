@@ -1,9 +1,9 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
-import { Team } from '@database/entities/team.entity';
-import { IRAN_TEAM_ID } from '@database/seeds/teams.seed';
-import { RedisService } from '@modules/redis/redis.service';
+import { Team } from '../../database/entities/team.entity';
+import { IRAN_TEAM_ID } from '../../database/seeds/teams.seed';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class TeamService {

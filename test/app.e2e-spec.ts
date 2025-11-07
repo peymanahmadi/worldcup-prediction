@@ -1,27 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { TokenService } from '../src/modules/auth/services/token.service';
+import { AuthGuard } from '../src/common/guards/auth.guard';
+import { GlobalExceptionFilter } from '../src/common/filters/http-exception.filter';
 
 describe('Authentication (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
+    // Set NODE_ENV to development so OTP code is returned
+    process.env.NODE_ENV = 'development';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
 
+    // Set up global exception filter
+    app.useGlobalFilters(new GlobalExceptionFilter());
+
+    // Set up global validation pipe (matching main.ts)
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
+        transformOptions: { enableImplicitConversion: true },
       }),
     );
+
+    // Initialize app first before getting services
     await app.init();
+
+    // Set up global authentication guard (matching main.ts)
+    const reflector = app.get(Reflector);
+    const tokenService = app.get(TokenService);
+    app.useGlobalGuards(new AuthGuard(reflector, tokenService));
   });
 
   afterAll(async () => {
@@ -33,7 +52,7 @@ describe('Authentication (e2e)', () => {
       const testPhone = `0912${Date.now().toString().slice(-7)}`;
 
       return request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: testPhone })
         .expect(200)
         .expect((res) => {
@@ -45,14 +64,14 @@ describe('Authentication (e2e)', () => {
 
     it('should reject invalid phone number format', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: '123456' })
         .expect(400);
     });
 
     it('should reject non-Iranian phone number', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: '01234567890' }) // Starts with 01 instead of 09
         .expect(400);
     });
@@ -62,13 +81,13 @@ describe('Authentication (e2e)', () => {
 
       // First request - should succeed
       await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: testPhone })
         .expect(200);
 
       // Second request immediately to same phone - should be blocked
       const response = await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: testPhone })
         .expect(429);
 
@@ -83,13 +102,13 @@ describe('Authentication (e2e)', () => {
 
       // Send OTP to first phone
       await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: phone1 })
         .expect(200);
 
       // Send OTP to second phone immediately - should work
       await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: phone2 })
         .expect(200);
     });
@@ -105,7 +124,7 @@ describe('Authentication (e2e)', () => {
 
       // Send OTP first
       const response = await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: testPhone });
 
       otpCode = response.body.data.code;
@@ -113,7 +132,7 @@ describe('Authentication (e2e)', () => {
 
     it('should verify OTP successfully', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/verify-otp')
+        .post('/auth/verify-otp')
         .send({ phone: testPhone, code: otpCode })
         .expect(200)
         .expect((res) => {
@@ -126,7 +145,7 @@ describe('Authentication (e2e)', () => {
 
     it('should reject invalid OTP code', async () => {
       const response = await request(app.getHttpServer())
-        .post('/api/auth/verify-otp')
+        .post('/auth/verify-otp')
         .send({ phone: testPhone, code: '000000' })
         .expect(400);
 
@@ -140,7 +159,7 @@ describe('Authentication (e2e)', () => {
       const wrongPhone = `0917${Date.now().toString().slice(-7)}`;
 
       const response = await request(app.getHttpServer())
-        .post('/api/auth/verify-otp')
+        .post('/auth/verify-otp')
         .send({ phone: wrongPhone, code: otpCode })
         .expect(404);
 
@@ -152,14 +171,12 @@ describe('Authentication (e2e)', () => {
       const phone = `0918${Date.now().toString().slice(-7)}`;
 
       // Send OTP
-      await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
-        .send({ phone });
+      await request(app.getHttpServer()).post('/auth/send-otp').send({ phone });
 
       // Try 5 times with wrong code
       for (let i = 1; i <= 5; i++) {
         const response = await request(app.getHttpServer())
-          .post('/api/auth/verify-otp')
+          .post('/auth/verify-otp')
           .send({ phone, code: '000000' });
 
         if (i < 5) {
@@ -177,7 +194,7 @@ describe('Authentication (e2e)', () => {
       const phone = `0919${Date.now().toString().slice(-7)}`;
 
       const response = await request(app.getHttpServer())
-        .post('/api/auth/verify-otp')
+        .post('/auth/verify-otp')
         .send({ phone, code: '123456' })
         .expect(404);
 
@@ -190,14 +207,14 @@ describe('Authentication (e2e)', () => {
 
       // Send OTP
       const sendResponse = await request(app.getHttpServer())
-        .post('/api/auth/send-otp')
+        .post('/auth/send-otp')
         .send({ phone: newPhone });
 
       const code = sendResponse.body.data.code;
 
       // Verify OTP
       const verifyResponse = await request(app.getHttpServer())
-        .post('/api/auth/verify-otp')
+        .post('/auth/verify-otp')
         .send({ phone: newPhone, code })
         .expect(200);
 

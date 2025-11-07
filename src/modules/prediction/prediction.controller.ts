@@ -19,10 +19,10 @@ import {
 } from '@nestjs/swagger';
 import { PredictionService } from './services/prediction.service';
 import { SubmitPredictionDto } from './dto/submit-prediction.dto';
-import { AuthGuard } from '@common/guards/auth.guard';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
-import { User } from '@database/entities/user.entity';
-import { ScoringService } from '@modules/scoring/services/scoring.service';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from '../../database/entities/user.entity';
+import { ScoringService } from '../../modules/scoring/services/scoring.service';
 
 @ApiTags('prediction')
 @Controller('predictions')

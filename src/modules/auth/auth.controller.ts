@@ -19,14 +19,14 @@ import {
 import { AuthService } from './auth.service';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { RateLimitGuard } from '@common/guards/rate-limit.guard';
-import { RateLimit } from '@common/decorators/rate-limit.decorator';
-import { AuthGuard } from '@common/guards/auth.guard';
-import { Public } from '@common/decorators/public.decorator';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
-import { CurrentSession } from '@common/decorators/current-session.decorator';
-import { User } from '@database/entities/user.entity';
-import { Session } from '@database/entities/session.entity';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentSession } from '../../common/decorators/current-session.decorator';
+import { User } from '../../database/entities/user.entity';
+import { Session } from '../../database/entities/session.entity';
 import type { Request } from 'express';
 
 @ApiTags('auth')

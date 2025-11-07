@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
 import { TokenService } from './token.service';
-import { Session } from '@database/entities/session.entity';
-import { User } from '@database/entities/user.entity';
-import { RedisService } from '@modules/redis/redis.service';
+import { Session } from '../../../database/entities/session.entity';
+import { User } from '../../../database/entities/user.entity';
+import { RedisService } from '../../redis/redis.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 

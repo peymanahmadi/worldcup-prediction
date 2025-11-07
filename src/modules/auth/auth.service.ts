@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../database/entities/user.entity';
 import { Repository } from 'typeorm';
 import { OtpService } from './services/otp.service';
 import { TokenService } from './services/token.service';
 import { DeviceInfo } from './interfaces/token.interface';
+import { SmsService } from './services/sms.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly otpService: OtpService,
     private readonly tokenService: TokenService,
+    private readonly smsService: SmsService,
   ) {}
 
   /**
@@ -23,20 +25,70 @@ export class AuthService {
    */
   async sendOtp(phone: string): Promise<any> {
     try {
+      // Generate and store OTP
       const code = await this.otpService.generateAndStoreOtp(phone);
-      // TODO: Send SMS via sms.ir
-      // For now
-      this.logger.debug(`OTP for ${phone}: ${code}`);
+
+      // Send SMS via sms.ir
+      const smsResponse = await this.smsService.sendOtp(phone, code);
+
+      // Check if SMS was sent successfully
+      if (!this.smsService.isSuccessResponse(smsResponse)) {
+        this.logger.error(
+          `Failed to send SMS to ${phone}. Status: ${smsResponse.status}, Message: ${smsResponse.message}`,
+        );
+
+        // In sandbox mode, still return success for testing
+        if (process.env.SMS_SANDBOX === 'true') {
+          this.logger.warn(
+            `⚠️ Sandbox mode: SMS failed but returning success for testing. Code: ${code}`,
+          );
+
+          return {
+            success: true,
+            message: 'OTP sent successfully (Sandbox mode)',
+            data: {
+              phone,
+              code, // Show code in sandbox mode
+              smsStatus: smsResponse.status,
+              smsMessage: smsResponse.message,
+            },
+          };
+        }
+
+        // In production, throw error
+        const errorMessage = this.smsService.getErrorMessage(
+          smsResponse.status,
+        );
+
+        throw new BadRequestException({
+          success: false,
+          error: {
+            code: 'SMS_SEND_FAILED',
+            message: `Failed to send SMS: ${errorMessage}`,
+            statusCode: 400,
+            smsStatus: smsResponse.status,
+          },
+        });
+      }
+
+      // Success response
+      this.logger.log(`✅ OTP sent successfully to ${phone}`);
 
       return {
         success: true,
         message: 'OTP sent successfully',
         data: {
           phone,
+          messageId: smsResponse.data?.messageId,
+          // Show code only in development mode
           ...(process.env.NODE_ENV === 'development' && { code }),
         },
       };
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
       this.logger.error(`Error sending OTP to ${phone}:`, error);
       throw error;
     }
