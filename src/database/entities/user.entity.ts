@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { Session } from './session.entity';
+import { Prediction } from './prediction.entity';
 
 @Entity('users')
 export class User {
@@ -31,4 +33,7 @@ export class User {
   // Relations
   @OneToMany(() => Session, (session) => session.user)
   sessions: Session[];
+
+  @OneToOne(() => Prediction, (prediction) => prediction.user)
+  prediction: Prediction;
 }

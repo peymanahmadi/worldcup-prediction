@@ -13,6 +13,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerMiddleware } from '@common/middleware/logger.middleware';
+import { TeamModule } from './modules/team/team.module';
+import { PredictionModule } from './modules/prediction/prediction.module';
+import { ScoringModule } from './modules/scoring/scoring.module';
+import { QueueModule } from '@modules/queue/queue.module';
+import { AdminModule } from '@modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -31,6 +36,11 @@ import { LoggerMiddleware } from '@common/middleware/logger.middleware';
     AuthModule,
     RedisModule,
     HealthModule,
+    TeamModule,
+    PredictionModule,
+    ScoringModule,
+    // QueueModule,
+    AdminModule,
   ],
 })
 export class AppModule implements NestModule {
